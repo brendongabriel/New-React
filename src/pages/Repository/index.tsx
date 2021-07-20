@@ -1,47 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouteMatch, Link } from 'react-router-dom';
 import { Header, RepositoryInfo, Issues } from './styles';
 import api from '../../services/api';
 import LogoImg from '../../assets/logo.svg';
-import { useEffect } from 'react';
 
 
-interface RepositoryParams{
+interface RepositoryParams {
   repository: string;
 }
 
-interface Repository{
+interface Repositorio {
   full_name: string;
   description: string;
-  stargazzers_count: number;
+  stargazers_count: number;
   forks_count: number;
   open_issues_count: number;
   owner: {
     login: string;
     avatar_url: string;
-  }
+  };
 }
 
-interface Issue{
+interface Issue {
   id: number;
   title: string;
   html_url: string;
-  user:{
+  user: {
     login: string;
-  }
+    avatar_url: string;
+  };
 }
 
 const Repository: React.FC = () =>{
-  const [repository, setRepository] = useState<Repository | null>(null);
+  const [repository, setRepository] = useState<Repositorio | null>(null);
   const [issues, setIssues ] = useState<Issue[]>([]);
 
   const { params } = useRouteMatch<RepositoryParams>();
 
   useEffect(() => {
-    api.get(`repos/${params.repository}/issues`).then(response => {
+    api.get(`repos/${params.repository}`).then((response) => {
       console.log(response.data);
-    })
-  },[params.repository])
+      setRepository(response.data);
+    });
+
+    api.get(`repos/${params.repository}/issues`).then((response) => {
+      console.log(response.data);
+      setIssues(response.data);
+    });
+  }, [params.repository]);
 
   return (
     <>
@@ -50,41 +56,44 @@ const Repository: React.FC = () =>{
           <Link to='/'>Voltar</Link>
       </Header>
 
-      <RepositoryInfo>
-        <header>
-          <img src="https://avatars.githubusercontent.com/u/69631?s=88&v=4" alt="Facebook" />
-          <div>
-            <strong>Facebook</strong>
-            <p>Repositório do ReactJS no GitHub do Facebook</p>
-          </div>
-        </header>
-        <ul>
-          <li>
-            <strong>172K</strong>
-            <span>Starts</span>
-          </li>
-          <li>
-            <strong>34K</strong>
-            <span>Forks</span>
-          </li>
-          <li>
-            <strong>574</strong>
-            <span>Issues abertas</span>
-          </li>
-        </ul>
-      </RepositoryInfo>
+      {repository && (
+        <RepositoryInfo>
+          <header>
+            <img src={repository.owner.avatar_url} alt={repository.owner.login} />
+            <div>
+              <strong>{repository.full_name}</strong>
+              <p>{repository.description}</p>
+            </div>
+          </header>
+          <ul>
+            <li>
+              <strong>{repository.stargazers_count}</strong>
+              <span>Starts</span>
+            </li>
+            <li>
+              <strong>{repository.forks_count}</strong>
+              <span>Forks</span>
+            </li>
+            <li>
+              <strong>{repository.open_issues_count}</strong>
+              <span>Issues abertas</span>
+            </li>
+          </ul>
+        </RepositoryInfo>
+      )}
 
       <Issues>
-
-        <Link to='teste'>
+        {issues.map((issue) => (
+          <a key={issue.id} href={issue.html_url} target="black">
             <img
-              src="https://avatars.githubusercontent.com/u/82897687?v=4" alt="Brendon"
+              src={issue.user.avatar_url} alt={issue.user.login}
             />
             <div>
-              <strong>Facebook</strong>
-              <p>Descriçaõ do repossitorio</p>
+              <strong>{issue.title}</strong>
+              <p>{issue.user.login}</p>
             </div>
-        </Link>
+        </a>
+        ))}
       </Issues>
     </>
   )
