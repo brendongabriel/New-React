@@ -1,4 +1,4 @@
-import { createGlobalStyle } from "styled-components";
+import { createGlobalStyle } from 'styled-components';
 
 export default createGlobalStyle`
   * {
@@ -20,11 +20,10 @@ export default createGlobalStyle`
   #root {
     max-width: 960px;
     margin: 0 auto;
-    padding: 0px 20px;
+    padding: 40px 20px;
   }
 
   button {
     cursor: pointer;
   }
-
 `;
